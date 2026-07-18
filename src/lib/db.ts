@@ -13,7 +13,7 @@ export async function getDb(): Promise<AnyPrisma | null> {
   if (g.prisma !== undefined) return g.prisma;
   try {
     const mod = await import("@prisma/client");
-    const PrismaClient = (mod as { PrismaClient: new () => AnyPrisma }).PrismaClient;
+    const PrismaClient = (mod as unknown as { PrismaClient: new () => AnyPrisma }).PrismaClient;
     g.prisma = new PrismaClient();
   } catch {
     g.prisma = null; // client not generated — run `npm run db:generate`
