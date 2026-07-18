@@ -76,7 +76,13 @@ async function main() {
   let nextBookId = 100;
   for (const id of Object.keys(SOURCES)) {
     console.log(`Fetching full ${id.toUpperCase()} text…`);
-    const books = await fetchTranslation(id);
+    let books: SourceBook[];
+    try {
+      books = await fetchTranslation(id);
+    } catch (e) {
+      console.warn(`⚠️  Skipping ${id.toUpperCase()}: ${(e as Error).message}`);
+      continue;
+    }
     for (const book of books) {
       const slug = slugify(book.name);
       let bookId: number | undefined = bookIds.get(slug);
