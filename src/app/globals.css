@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ground: 245 247 248;
+  --surface: 255 255 255;
+  --ink: 27 42 58;
+  --muted: 96 112 130;
+  --line: 224 230 236;
+  --lapis: 56 88 134;
+  --gilt: 158 122 34;
+  --sage: 110 140 104;
+  --font-scripture: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.dark {
+  --ground: 13 20 32;
+  --surface: 23 32 47;
+  --ink: 230 235 242;
+  --muted: 148 160 178;
+  --line: 46 58 78;
+  --lapis: 130 158 200;
+  --gilt: 208 172 78;
+  --sage: 146 174 138;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  @apply bg-ground text-ink font-ui antialiased;
+}
+
+/* Dawn-light radial wash behind the hero */
+.dawn {
+  background:
+    radial-gradient(60rem 32rem at 50% -8rem, rgb(var(--lapis) / 0.10), transparent 60%),
+    radial-gradient(40rem 24rem at 80% -4rem, rgb(var(--gilt) / 0.08), transparent 60%);
+}
+
+/* Illuminated drop cap for the daily reading */
+.dropcap::first-letter {
+  @apply font-scripture text-gilt float-left mr-3;
+  font-size: 3.6em;
+  line-height: 0.85;
+  padding-top: 0.08em;
+}
+
+.gilt-rule {
+  height: 1px;
+  background: linear-gradient(90deg, rgb(var(--gilt) / 0.7), rgb(var(--gilt) / 0.12) 70%, transparent);
+}
+
+.eyebrow {
+  @apply text-xs font-semibold uppercase text-muted;
+  letter-spacing: 0.14em;
+}
+
+mark {
+  @apply rounded px-0.5;
+  background: rgb(var(--gilt) / 0.22);
+  color: inherit;
+}
+
+.strongs-word {
+  @apply cursor-pointer rounded-sm underline decoration-dotted underline-offset-4;
+  text-decoration-color: rgb(var(--gilt) / 0.8);
+}
+.strongs-word:hover, .strongs-word:focus-visible {
+  background: rgb(var(--gilt) / 0.14);
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--lapis));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

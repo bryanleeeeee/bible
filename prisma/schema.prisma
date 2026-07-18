@@ -1,0 +1,310 @@
+// Lumen — Bible study platform schema
+// Postgres + pgvector (semantic search). Run `CREATE EXTENSION IF NOT EXISTS vector;`
+// before db push, or use Supabase where pgvector is one click.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+// ---------- Canonical text ----------
+
+model Book {
+  id         Int       @id
+  slug       String    @unique // "genesis"
+  name       String
+  testament  Testament
+  genre      Genre
+  order      Int
+  authorName String?
+  dateNote   String?   // e.g. "c. 1445–1405 BC"
+  chapters   Chapter[]
+  people     PersonBook[]
+}
+
+model Chapter {
+  id     Int     @id @default(autoincrement())
+  bookId Int
+  number Int
+  book   Book    @relation(fields: [bookId], references: [id])
+  verses Verse[]
+
+  @@unique([bookId, number])
+}
+
+model Translation {
+  id           String      @id // "kjv", "web", "niv"
+  name         String
+  language     String      @default("en")
+  publicDomain Boolean     @default(false)
+  provider     String      @default("local") // local | api.bible | biblia
+  texts        VerseText[]
+}
+
+model Verse {
+  id        Int         @id @default(autoincrement())
+  chapterId Int
+  number    Int
+  ref       String      @unique // "john-3-16"
+  chapter   Chapter     @relation(fields: [chapterId], references: [id])
+  texts     VerseText[]
+  words     VerseWord[]
+  themes    VerseTheme[]
+  people    VersePerson[]
+  places    VersePlace[]
+  from      CrossRef[]  @relation("from")
+  to        CrossRef[]  @relation("to")
+  embedding Embedding?
+  notes     Note[]
+  bookmarks Bookmark[]
+  highlights Highlight[]
+
+  @@unique([chapterId, number])
+}
+
+model VerseText {
+  verseId       Int
+  translationId String
+  text          String
+  verse         Verse       @relation(fields: [verseId], references: [id])
+  translation   Translation @relation(fields: [translationId], references: [id])
+
+  @@id([verseId, translationId])
+  @@index([translationId])
+}
+
+model Embedding {
+  verseId Int                        @id
+  vector  Unsupported("vector(1536)")
+  verse   Verse                      @relation(fields: [verseId], references: [id])
+}
+
+// ---------- Original languages ----------
+
+model StrongsEntry {
+  id              String      @id // "H7462", "G26"
+  language        Lang
+  lemma           String      // רָעָה / ἀγάπη
+  transliteration String
+  pronunciation   String
+  literal         String
+  definition      String
+  usageNote       String?
+  words           VerseWord[]
+}
+
+model VerseWord {
+  id        Int          @id @default(autoincrement())
+  verseId   Int
+  position  Int
+  surface   String       // word as it appears in the translation
+  strongsId String
+  verse     Verse        @relation(fields: [verseId], references: [id])
+  strongs   StrongsEntry @relation(fields: [strongsId], references: [id])
+
+  @@index([strongsId])
+  @@unique([verseId, position])
+}
+
+// ---------- Knowledge layer ----------
+
+model Person {
+  id String @id
+  name String
+  summary String?
+  verses VersePerson[]
+  books PersonBook[]
+  nodes GraphNode[]
+}
+model Place {
+  id String @id
+  name String
+  lat Float?
+  lng Float?
+  summary String?
+  verses VersePlace[]
+}
+model Theme {
+  id String @id
+  name String
+  summary String?
+  verses VerseTheme[]
+}
+
+model VersePerson {
+  verseId Int
+  personId String
+  verse Verse @relation(fields:[verseId],references:[id])
+  person Person @relation(fields:[personId],references:[id])
+  @@id([verseId, personId])
+}
+model VersePlace {
+  verseId Int
+  placeId  String
+  verse Verse @relation(fields:[verseId],references:[id])
+  place  Place  @relation(fields:[placeId], references:[id])
+  @@id([verseId, placeId])
+}
+model VerseTheme {
+  verseId Int
+  themeId  String
+  weight Float @default(1)
+  verse Verse @relation(fields:[verseId],references:[id])
+  theme Theme @relation(fields:[themeId],references:[id])
+  @@id([verseId, themeId])
+}
+model PersonBook {
+  personId String
+  bookId Int
+  person Person @relation(fields:[personId],references:[id])
+  book Book @relation(fields:[bookId],references:[id])
+  @@id([personId, bookId])
+}
+
+model CrossRef {
+  fromId Int
+  toId   Int
+  kind   CrossRefKind @default(THEMATIC)
+  weight Float        @default(1)
+  from   Verse        @relation("from", fields: [fromId], references: [id])
+  to     Verse        @relation("to", fields: [toId], references: [id])
+
+  @@id([fromId, toId])
+}
+
+model GraphNode {
+  id       String      @id // "person:david", "verse:1-samuel-17-45", "theme:faith"
+  kind     NodeKind
+  label    String
+  refId    String?     // FK into the relevant table, by convention
+  personId String?
+  person   Person?     @relation(fields: [personId], references: [id])
+  outgoing GraphEdge[] @relation("src")
+  incoming GraphEdge[] @relation("dst")
+}
+
+model GraphEdge {
+  srcId    String
+  dstId    String
+  relation String // "defeated", "wrote", "exemplifies", "fulfills"
+  weight   Float  @default(1)
+  src      GraphNode @relation("src", fields: [srcId], references: [id])
+  dst      GraphNode @relation("dst", fields: [dstId], references: [id])
+
+  @@id([srcId, dstId, relation])
+}
+
+// ---------- Users ----------
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  image         String?
+  createdAt     DateTime   @default(now())
+  bookmarks     Bookmark[]
+  highlights    Highlight[]
+  notes         Note[]
+  collections   Collection[]
+  history       StudyHistory[]
+  streak        ReadingStreak?
+}
+
+model Bookmark {
+  id String @id @default(cuid())
+  userId String
+  verseId Int
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id])
+  verse Verse @relation(fields:[verseId],references:[id])
+  @@unique([userId, verseId])
+}
+model Highlight {
+  id String @id @default(cuid())
+  userId String
+  verseId Int
+  color String @default("gilt")
+  user User @relation(fields:[userId],references:[id])
+  verse Verse @relation(fields:[verseId],references:[id])
+  @@unique([userId, verseId])
+}
+model Note {
+  id String @id @default(cuid())
+  userId String
+  verseId Int
+  body String
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id])
+  verse Verse @relation(fields:[verseId],references:[id])
+}
+model Collection {
+  id String @id @default(cuid())
+  userId String
+  name String
+  verseRefs String[]
+  user User @relation(fields:[userId],references:[id])
+}
+model StudyHistory {
+  id String @id @default(cuid())
+  userId String
+  query String
+  kind String
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id])
+  @@index([userId, createdAt])
+}
+model ReadingStreak {
+  userId String @id
+  current Int @default(0)
+  longest Int @default(0)
+  lastRead DateTime?
+  user User @relation(fields:[userId],references:[id])
+}
+
+enum Testament {
+  OLD
+  NEW
+}
+enum Genre {
+  LAW
+  HISTORY
+  POETRY
+  WISDOM
+  PROPHECY
+  GOSPEL
+  LETTER
+  APOCALYPTIC
+}
+enum Lang {
+  HEBREW
+  GREEK
+  ARAMAIC
+}
+enum CrossRefKind {
+  QUOTATION
+  PROPHECY_FULFILLMENT
+  PARALLEL
+  THEMATIC
+  PHRASE
+}
+enum NodeKind {
+  VERSE
+  BOOK
+  PERSON
+  PLACE
+  EVENT
+  THEME
+  PROPHECY
+  MIRACLE
+  PARABLE
+  OBJECT
+  ANIMAL
+  CONCEPT
+}

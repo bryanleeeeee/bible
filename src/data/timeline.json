@@ -1,0 +1,66 @@
+{
+  "eras": [
+    {
+      "id": "creation",
+      "label": "Creation & beginnings",
+      "range": "Before the patriarchs",
+      "events": [
+        { "id": "creation-week", "title": "God creates the heavens and the earth", "date": "In the beginning", "ref": "genesis-1-1", "people": [], "summary": "By his word alone, God brings light, order, and life out of nothing — the foundation every later story builds on." }
+      ]
+    },
+    {
+      "id": "patriarchs",
+      "label": "The patriarchs",
+      "range": "c. 2100–1800 BC",
+      "events": [
+        { "id": "joseph-egypt", "title": "Joseph forgives his brothers in Egypt", "date": "c. 1860 BC", "ref": "genesis-50-20", "people": ["joseph"], "summary": "Sold into slavery, raised to power, Joseph names the pattern of providence: what others meant for evil, God meant for good." }
+      ]
+    },
+    {
+      "id": "conquest",
+      "label": "Conquest & settlement",
+      "range": "c. 1406–1050 BC",
+      "events": [
+        { "id": "joshua-commission", "title": "Joshua commissioned to lead Israel", "date": "c. 1406 BC", "ref": "joshua-1-9", "people": ["joshua"], "summary": "After Moses, Joshua receives the charge that echoes through Scripture: be strong and courageous, for the LORD goes with you." }
+      ]
+    },
+    {
+      "id": "kingdom",
+      "label": "The united kingdom",
+      "range": "c. 1050–930 BC",
+      "events": [
+        { "id": "david-goliath", "title": "David defeats Goliath", "date": "c. 1024 BC", "ref": "1-samuel-17-45", "people": ["david", "goliath"], "summary": "A shepherd boy with a sling meets a giant with a spear — and reframes the battle: it belongs to the LORD." },
+        { "id": "psalms-written", "title": "David composes the shepherd psalms", "date": "c. 1010–970 BC", "ref": "psalms-23-1", "people": ["david"], "summary": "The warrior-king writes as a sheep: the LORD is my shepherd. Israel's songbook takes shape." }
+      ]
+    },
+    {
+      "id": "prophets",
+      "label": "Prophets & exile",
+      "range": "c. 740–530 BC",
+      "events": [
+        { "id": "isaiah-comfort", "title": "Isaiah speaks comfort to a fearful people", "date": "c. 700 BC", "ref": "isaiah-41-10", "people": [], "summary": "Facing empires and exile, the prophet carries God's refrain: fear not, for I am with you." },
+        { "id": "jeremiah-letter", "title": "Jeremiah's letter to the exiles", "date": "c. 594 BC", "ref": "jeremiah-29-11", "people": [], "summary": "To a displaced generation in Babylon: God's plans hold a future and a hope — even in a land you didn't choose." }
+      ]
+    },
+    {
+      "id": "jesus",
+      "label": "The life of Jesus",
+      "range": "c. 4 BC – AD 30",
+      "events": [
+        { "id": "word-flesh", "title": "The Word becomes flesh", "date": "c. 4 BC", "ref": "john-1-14", "people": ["jesus"], "summary": "John reaches back to Genesis — in the beginning was the Word — and announces that the Word has moved into the neighborhood." },
+        { "id": "sermon-mount", "title": "The Sermon on the Mount", "date": "c. AD 28", "ref": "matthew-6-25", "people": ["jesus"], "summary": "On a Galilean hillside, Jesus dismantles worry: look at the birds, consider the lilies, seek first the kingdom." },
+        { "id": "upper-room", "title": "Peace promised in the upper room", "date": "c. AD 30", "ref": "john-14-27", "people": ["jesus"], "summary": "On the night of his arrest, Jesus leaves his friends an inheritance no one can confiscate: my peace I give unto you." }
+      ]
+    },
+    {
+      "id": "church",
+      "label": "The early church",
+      "range": "c. AD 30–95",
+      "events": [
+        { "id": "romans-written", "title": "Paul writes to the Romans", "date": "c. AD 57", "ref": "romans-8-28", "people": ["paul"], "summary": "From Corinth, Paul writes his fullest account of the gospel — and its most quoted assurance: all things work together for good." },
+        { "id": "philippians-written", "title": "Paul writes from prison in Rome", "date": "c. AD 61", "ref": "philippians-4-6", "people": ["paul"], "summary": "In chains, Paul writes the New Testament's most joyful letter: rejoice, be anxious for nothing, and the peace of God will guard you." },
+        { "id": "hebrews-faith", "title": "The letter to the Hebrews defines faith", "date": "c. AD 65", "ref": "hebrews-11-1", "people": [], "summary": "Faith is the substance of things hoped for — then a roll call of everyone from Abel to David who lived it." }
+      ]
+    }
+  ]
+}

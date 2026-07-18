@@ -1,0 +1,12 @@
+{
+  "name": "Lumen — Bible Study",
+  "short_name": "Lumen",
+  "description": "Search, compare, and explore Scripture with original-language word study and a knowledge graph.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F7F8",
+  "theme_color": "#1B2A3A",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
