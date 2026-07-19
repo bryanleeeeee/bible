@@ -38,8 +38,19 @@ interface SourceBook {
   chapters: { chapter: number; verses: { verse: number; text: string }[] }[];
 }
 
+const NAME_ALIASES: Record<string, string> = {
+  "Revelation of John": "Revelation",
+};
+
 const slugify = (name: string) =>
-  name.toLowerCase().replace(/^([123]) /, "$1-").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  (NAME_ALIASES[name] ?? name)
+    .replace(/^III /, "3 ")
+    .replace(/^II /, "2 ")
+    .replace(/^I /, "1 ")
+    .toLowerCase()
+    .replace(/^([123]) /, "$1-")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 async function fetchTranslation(id: string): Promise<SourceBook[]> {
   const res = await fetch(SOURCES[id]);
@@ -79,7 +90,14 @@ async function main() {
         authorName: (b as { author?: string }).author ?? null,
         dateNote: (b as { date?: string }).date ?? null,
       },
-      update: { name: b.name },
+      update: {
+        name: b.name,
+        testament: b.testament as "OLD" | "NEW",
+        genre: b.genre as never,
+        order: b.order ?? order,
+        authorName: (b as { author?: string }).author ?? null,
+        dateNote: (b as { date?: string }).date ?? null,
+      },
     });
     bookIds.set(b.slug, created.id);
     order++;

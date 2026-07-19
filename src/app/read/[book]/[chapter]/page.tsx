@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import crossrefsData from "@/data/crossrefs.json";
 import { Reader } from "@/components/reader";
 import type { WordInfo } from "@/components/strongs-word";
-import { books, getBook, getChapterVerses, refToDisplay, translations, verses as allVerses } from "@/lib/bible";
+import { books, getBook, getChapterVerses, getChapterVersesFromDb, refToDisplay, translations, verses as allVerses } from "@/lib/bible";
 import { versesUsing, wordsFor } from "@/lib/strongs";
 import type { CrossRef } from "@/lib/types";
 
@@ -45,12 +45,12 @@ function availableChapters(): { book: string; chapter: number; label: string }[]
   return list.sort((a, z) => (order.get(a.book)! - order.get(z.book)!) || (a.chapter - z.chapter));
 }
 
-export default function ReadPage({ params }: { params: { book: string; chapter: string } }) {
+export default async function ReadPage({ params }: { params: { book: string; chapter: string } }) {
   const book = getBook(params.book);
   const chapter = Number(params.chapter);
   if (!book || !Number.isInteger(chapter) || chapter < 1) notFound();
 
-  const verses = getChapterVerses(book.slug, chapter);
+  const verses = (await getChapterVersesFromDb(book.slug, chapter)) ?? getChapterVerses(book.slug, chapter);
 
   if (verses.length === 0) {
     return (

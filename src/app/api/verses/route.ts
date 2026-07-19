@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getChapterVerses, getVerse, getBook, translations, providerFor, refToDisplay } from "@/lib/bible";
+import { getChapterVerses, getChapterVersesFromDb, getVerse, getVerseFromDb, getBook, translations, providerFor, refToDisplay } from "@/lib/bible";
 import { wordsFor, versesUsing } from "@/lib/strongs";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const t = p.get("t") ?? "kjv";
 
   if (ref) {
-    const verse = getVerse(ref);
+    const verse = getVerse(ref) ?? (await getVerseFromDb(ref));
     if (!verse) return NextResponse.json({ error: "Verse not found" }, { status: 404 });
     let text: string | null = verse.text[t] ?? null;
     if (!text) {
@@ -27,7 +27,8 @@ export async function GET(req: NextRequest) {
   const book = p.get("book");
   const chapter = Number(p.get("chapter"));
   if (book && chapter) {
-    return NextResponse.json({ book: getBook(book), verses: getChapterVerses(book, chapter), translations });
+    const verses = (await getChapterVersesFromDb(book, chapter)) ?? getChapterVerses(book, chapter);
+    return NextResponse.json({ book: getBook(book), verses, translations });
   }
   return NextResponse.json({ translations });
 }
