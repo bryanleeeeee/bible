@@ -76,12 +76,14 @@ async function main() {
 
   console.log("Seeding curated book metadata…");
   const bookIds = new Map<string, number>();
+  const maxIdRow = (await prisma.$queryRawUnsafe(`SELECT COALESCE(MAX(id), 0) AS max FROM "Book"`)) as { max: number | bigint }[];
+  let nextId = Number(maxIdRow[0].max) + 1;
   let order = 1;
   for (const b of bible.books) {
     const created = await prisma.book.upsert({
       where: { slug: b.slug },
       create: {
-        id: order,
+        id: nextId++,
         slug: b.slug,
         name: b.name,
         testament: b.testament as "OLD" | "NEW",
@@ -103,7 +105,6 @@ async function main() {
     order++;
   }
 
-  let nextBookId = 100;
   for (const id of Object.keys(SOURCES)) {
     console.log(`Fetching full ${id.toUpperCase()} text…`);
     let books: SourceBook[];
@@ -120,12 +121,12 @@ async function main() {
         const created = await prisma.book.upsert({
           where: { slug },
           create: {
-            id: nextBookId++,
+            id: nextId++,
             slug,
             name: book.name,
             testament: "OLD", // refined later; ordering data lives in curated metadata
             genre: "HISTORY" as never,
-            order: nextBookId,
+            order: nextId,
           },
           update: {},
         });
