@@ -16,6 +16,18 @@ import graph from "../src/data/graph.json";
 
 const prisma = new PrismaClient();
 
+async function withRetry<T>(fn: () => Promise<T>, retries = 5): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (attempt >= retries || (code !== "P1017" && code !== "P1001")) throw e;
+      await new Promise((r) => setTimeout(r, 500 * attempt));
+    }
+  }
+}
+
 const SOURCES: Record<string, string> = {
   kjv: "https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/KJV.json",
   web: "https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/WEB.json",
@@ -103,23 +115,23 @@ async function main() {
         bookIds.set(slug, bookId);
       }
       for (const ch of book.chapters) {
-        const chapter = await prisma.chapter.upsert({
+        const chapter = await withRetry(() => prisma.chapter.upsert({
           where: { bookId_number: { bookId, number: ch.chapter } },
           create: { bookId, number: ch.chapter },
           update: {},
-        });
+        }));
         for (const v of ch.verses) {
           const ref = `${slug}-${ch.chapter}-${v.verse}`;
-          const verse = await prisma.verse.upsert({
+          const verse = await withRetry(() => prisma.verse.upsert({
             where: { ref },
             create: { ref, chapterId: chapter.id, number: v.verse },
             update: {},
-          });
-          await prisma.verseText.upsert({
+          }));
+          await withRetry(() => prisma.verseText.upsert({
             where: { verseId_translationId: { verseId: verse.id, translationId: id } },
             create: { verseId: verse.id, translationId: id, text: v.text.trim() },
             update: { text: v.text.trim() },
-          });
+          }));
         }
       }
       process.stdout.write(`  ${book.name}\n`);
